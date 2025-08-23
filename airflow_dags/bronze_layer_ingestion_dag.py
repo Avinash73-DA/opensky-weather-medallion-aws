@@ -1,7 +1,7 @@
 from airflow.models.dag import DAG
 from datetime import datetime,timedelta
 from airflow.providers.amazon.aws.operators.lambda_function import LambdaInvokeFunctionOperator
-from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
+from airflow.providers.amazon.aws.operators.glue import AwsGlueJobOperator
 
 default_args = {
     'owner':'Avinash',
@@ -32,22 +32,22 @@ with DAG(
     )
 
     ## Transformation for Silver Layer
-    process_plane_data = GlueJobOperator(
+    process_plane_data = AwsGlueJobOperator(
         task_id="process_plane_data",
         job_name="planes_silver",
         wait_for_completion=True
     )
     
-    process_weather_data = GlueJobOperator(
+    process_weather_data = AwsGlueJobOperator(
         task_id="process_weather_data",
         job_name="openweather_silver",
         wait_for_completion=True
     )
     
-    process_enriched_data = GlueJobOperator(
+    process_enriched_data = AwsGlueJobOperator(
         task_id="process_enriched_data",
         job_name="open_sky_weather_enriched_silver",
         wait_for_completion=True
     )
     
-    [lambda_flights,lambda_weather] >> [process_plane_data,process_weather_data,process_enriched_data]
+    [lambda_flights,lambda_weather] >> process_plane_data,process_weather_data,process_enriched_data
