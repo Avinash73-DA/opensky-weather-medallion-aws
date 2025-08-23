@@ -21,7 +21,8 @@ with DAG(
     tags=["aws","lambda","glue","silver","ingestion"]
 ) as dag:
     
-    ## Bronze Layer Ingestion (run in parallel)
+    ## Layer 1: Bronze Ingestion (Run in parallel)
+    
     lambda_flights = LambdaInvokeFunctionOperator(
         task_id="invoke_lambda_flights",
         function_name="flights_data_pull",
@@ -32,7 +33,8 @@ with DAG(
         function_name="weatherDataPull",
     )
 
-    ## Silver Layer Transformation
+    ## Layer 2: Silver Transformation
+    
     process_plane_data = GlueJobOperator(
         task_id="process_plane_data",
         job_name="planes_silver",
@@ -52,11 +54,32 @@ with DAG(
         wait_for_completion=True
     )
     
-    # CORRECTED DEPENDENCIES: Define the logical data flow
+    ## Layer 3: Gold Layer Aggregation (Run in parallel)
     
-    # Each processing job depends on its specific ingestion job
+    gold_weather_impact = GlueJobOperator(
+        task_id='gold_weather_impact',
+        job_name='WeatherImpactOnFlights',
+        wait_for_completion=True
+    )
+    
+    flight_weather = GlueJobOperator(
+        task_id='flight_weather',
+        job_name='flight_weather_snapshot',
+        wait_for_completion=True
+    )
+    
+    weather_history = GlueJobOperator(
+        task_id='weather_history',
+        job_name='CityWeatherHistory',
+        wait_for_completion=True
+    )
+    
+    # Step 1: Specific Lambda ingestion tasks trigger the first set of Silver jobs.
     lambda_flights >> process_plane_data
     lambda_weather >> process_weather_data
     
-    # The final enrichment job depends on the completion of the two processing jobs
+    # Step 2: The enrichment job (final Silver task) runs only after the initial Silver jobs are done.
     [process_plane_data, process_weather_data] >> process_enriched_data
+    
+    # Step 3: All Gold jobs run in parallel, but only after the final Silver job is complete.
+    process_enriched_data >> [gold_weather_impact, flight_weather ,weather_history]
