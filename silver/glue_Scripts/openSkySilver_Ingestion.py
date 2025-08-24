@@ -11,11 +11,13 @@ from pyspark.sql.functions import (
     from_utc_timestamp,
     year,
     month,
-    dayofmonth
+    dayofmonth,
+    udf
 )
 from pyspark.sql.types import (
     StringType, ArrayType, LongType,
-    IntegerType, FloatType, BooleanType
+    IntegerType, FloatType, BooleanType,
+    StructType, StructField
 )
 
 # --- 1. Initialization ---
@@ -56,7 +58,33 @@ try:
     exploded_view = df_raw.select(explode('states').alias('state_data'))
     print("Data Loaded Successfully with Bookmark Enabled")
 
-    # --- 3. Fully Robust Transformation Logic ---
+    # --- 3. Simplified Transformation Logic using a UDF ---
+
+    # This UDF handles the inconsistent data structure. It checks if the data
+    # is a simple value or a nested object (struct) and extracts the correct
+    # value, returning it as a string.
+    def extract_value_from_item(item):
+        # If the item is None, return None
+        if item is None:
+            return None
+        # Check if the item is a struct-like object (a Row in PySpark)
+        if hasattr(item, '__fields__'):
+            # Check for possible nested values in order of likelihood
+            if 'string' in item.__fields__ and item['string'] is not None:
+                return str(item['string'])
+            if 'int' in item.__fields__ and item['int'] is not None:
+                return str(item['int'])
+            if 'double' in item.__fields__ and item['double'] is not None:
+                return str(item['double'])
+            if 'boolean' in item.__fields__ and item['boolean'] is not None:
+                return str(item['boolean'])
+            return None
+        # If it's not a struct, it's a simple scalar value
+        return str(item)
+
+    # Register the function as a UDF that returns a StringType
+    extract_value_udf = udf(extract_value_from_item, StringType())
+
     columns_with_types = [
         ('icao24', StringType()), ('callsign', StringType()), ('origin_country', StringType()),
         ('time_position', IntegerType()), ('last_contact', IntegerType()), ('longitude', FloatType()),
@@ -66,33 +94,12 @@ try:
         ('spi', BooleanType()), ('position_source', IntegerType())
     ]
 
-    # ✅ FINAL FIX: Proactively handle all fields that might be nested inside a struct.
-    # This comprehensive approach prevents future errors by assuming any numeric or
-    # boolean field could come in the inconsistent nested format.
-    select_exprs = []
-    
-    # Define all fields that might be nested structs based on their target data type
-    int_struct_fields = ['time_position', 'last_contact', 'position_source']
-    float_struct_fields = [
-        'longitude', 'latitude', 'baro_altitude', 'velocity', 
-        'true_track', 'vertical_rate', 'geo_altitude'
-    ] 
-    bool_struct_fields = ['on_ground', 'spi']
-
-    for i, (name, dtype) in enumerate(columns_with_types):
-        if name in int_struct_fields:
-            # For integer fields, access the nested 'int' value from the struct.
-            expr = col('state_data').getItem(i).getField('int').cast(dtype).alias(name)
-        elif name in float_struct_fields:
-            # For float fields, access the nested 'double' value from the struct.
-            expr = col('state_data').getItem(i).getField('double').cast(dtype).alias(name)
-        elif name in bool_struct_fields:
-            # For boolean fields, access the nested 'boolean' value from the struct.
-            expr = col('state_data').getItem(i).getField('boolean').cast(dtype).alias(name)
-        else:
-            # For string and other consistent fields, use direct casting.
-            expr = col('state_data').getItem(i).cast(dtype).alias(name)
-        select_exprs.append(expr)
+    # Apply the UDF to each item in the array, then cast to the final correct type.
+    # This makes the main transformation logic much cleaner.
+    select_exprs = [
+        extract_value_udf(col('state_data').getItem(i)).cast(dtype).alias(name)
+        for i, (name, dtype) in enumerate(columns_with_types)
+    ]
     
     df_transformed = exploded_view.select(*select_exprs)
 
@@ -112,9 +119,9 @@ try:
     
     # Write data with year, month, and day partitioning
     df_final.write.mode("append") \
-            .partitionBy("year", "month", "day") \
-            .parquet(s3_output_path)
-            
+              .partitionBy("year", "month") \
+              .parquet(s3_output_path)
+              
     print(f"Data Written Successfully to {s3_output_path}")
 
 except Exception as e:
