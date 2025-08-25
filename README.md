@@ -10,7 +10,6 @@
 ## 📋 Table of Contents
 
 - [🌟 Project Overview](#-project-overview)
-- [🏗️ Project Architecture](#️-project-architecture)
 - [⚡ Tech Stack](#-tech-stack)
 - [📊 Data Pipeline Layers](#-data-pipeline-layers)
   - [🥉 Bronze Layer (Data Ingestion)](#-bronze-layer-data-ingestion)
@@ -40,18 +39,6 @@ This project implements a **scalable, real-time data engineering pipeline** that
 
 ![Project Overview Diagram](./img_Src/Project_Overview.png)
 *Architecture Overview - Real-time Weather & Flight Data Pipeline*
-
-## 🏗️ Project Architecture
-
-### 📐 High-Level Architecture Diagram
-![Architecture Diagram](./img_Src/architecture_diagram.png)
-*Complete AWS Data Engineering Architecture*
-
-### 🌊 Data Flow Visualization
-![Data Flow](./img_Src/data_flow_diagram.png)
-*End-to-End Data Pipeline Flow*
-
-The architecture implements a **event-driven, serverless-first approach** with the following key components:
 
 ## ⚡ Tech Stack
 
