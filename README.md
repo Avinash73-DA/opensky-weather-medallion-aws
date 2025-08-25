@@ -71,12 +71,28 @@ This project implements a **scalable, real-time data engineering pipeline** that
 ```python
 # Sample Bronze Weather Data Structure
 {
-  "city": "New York",
-  "country": "US",
-  "temperature": 22.5,
-  "humidity": 65,
-  "weather_condition": "Clear",
-  "timestamp": "2025-08-25T10:00:00Z"
+  "time": 1756053193,
+  "states": [
+    [
+      "39de4f",
+      "TVF14AD ",
+      "France",
+      1756053192,
+      1756053192,
+      7.7404,
+      50.1109,
+      11887.2,
+      false,
+      233.83,
+      61.91,
+      0,
+      null,
+      12237.72,
+      "1000",
+      false,
+      0
+    ]
+  ]
 }
 ```
 
@@ -90,14 +106,49 @@ This project implements a **scalable, real-time data engineering pipeline** that
 ```python
 # Sample Bronze Flight Data Structure
 {
-  "icao24": "abc123",
-  "callsign": "DL1234",
-  "latitude": 40.7128,
-  "longitude": -74.0060,
-  "altitude": 35000,
-  "velocity": 850,
-  "timestamp": "2025-08-25T10:00:00Z"
-}
+        "coord": {
+            "lon": -74.006,
+            "lat": 40.7143
+        },
+        "weather": [
+            {
+                "id": 803,
+                "main": "Clouds",
+                "description": "broken clouds",
+                "icon": "04d"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 294.31,
+            "feels_like": 294.62,
+            "temp_min": 294.31,
+            "temp_max": 294.31,
+            "pressure": 1015,
+            "humidity": 82,
+            "sea_level": 1015,
+            "grnd_level": 1014
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 3.38,
+            "deg": 197,
+            "gust": 5.29
+        },
+        "clouds": {
+            "all": 71
+        },
+        "dt": 1756039504,
+        "sys": {
+            "country": "US",
+            "sunrise": 1756030535,
+            "sunset": 1756078889
+        },
+        "timezone": -14400,
+        "id": 5128581,
+        "name": "New York",
+        "cod": 200
+    }
 ```
 
 ### 🥈 Silver Layer (Data Processing)
