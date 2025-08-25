@@ -201,6 +201,31 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 
 ### 🥇 Gold Layer (Analytics Ready)
 
+```python
+# Gold Layer Setup
+import sys
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue.utils import getResolvedOptions
+from pyspark.sql.functions import col, from_unixtime, count, when, current_timestamp, from_utc_timestamp
+
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+
+df_validated = df.groupBy(from_unixtime(col('time_position')).cast('date').alias('date'),col('country'),col('city'))\
+    .agg(count(col('*')).alias('count'),
+         count(
+             when(col('description').isin('very heavy rain','heavy intensity rain','moderate rain'),1)
+               ).alias('flights_in_storm')
+        )\
+    .withColumn('timestamp',from_utc_timestamp(current_timestamp(), 'Asia/Kolkata'))
+```
+
 ![Gold Layer](./img_Src/gold_layer.png)
 
 **Purpose**: Business-ready analytics tables
