@@ -153,7 +153,7 @@ This project implements a **scalable, real-time data engineering pipeline** that
 
 ### 🥈 Silver Layer (Data Processing)
 
-![Silver Layer](./img_Src/silver_layer.png)
+![Silver Layer](./img_Src/Glue_Script.png)
 
 **Purpose**: Data cleaning, transformation, and structuring
 
