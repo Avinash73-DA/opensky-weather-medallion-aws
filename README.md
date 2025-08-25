@@ -57,7 +57,7 @@ This project implements a **scalable, real-time data engineering pipeline** that
 
 ### 🥉 Bronze Layer (Data Ingestion)
 
-![Bronze Layer](./img_Src/bronze_layer.png)
+![Bronze Layer](./img_Src/Lambda.png)
 
 **Purpose**: Raw data ingestion and storage
 
