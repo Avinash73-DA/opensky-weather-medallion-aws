@@ -226,7 +226,7 @@ df_validated = df.groupBy(from_unixtime(col('time_position')).cast('date').alias
     .withColumn('timestamp',from_utc_timestamp(current_timestamp(), 'Asia/Kolkata'))
 ```
 
-![Gold Layer](./img_Src/gold_layer.png)
+![Gold Layer](./img_Src/Golder_Layer_s3.png)
 
 **Purpose**: Business-ready analytics tables
 
