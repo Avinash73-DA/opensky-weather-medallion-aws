@@ -355,16 +355,16 @@ airflow webserver --port 8080
 ## 📸 Project Screenshots
 
 ### 🎛️ Airflow Dashboard
-![Airflow Dashboard](./img_Src/airflow_dashboard.png)
+![Airflow Dashboard](./img_Src/Airlfow_Dag.png)
 
 ### 📊 Athena Query Console
-![Athena Console](./img_Src/athena_console.png)
+![Athena Console](./img_Src/Athena_console.png)
 
 ### 🗃️ S3 Data Organization
-![S3 Structure](./img_Src/s3_structure.png)
+![S3 Structure](./img_Src/Glue_Silver_Gold_Monitoring.png)
 
 ### 📈 Glue Job Monitoring
-![Glue Monitoring](./img_Src/glue_monitoring.png)
+![Glue Monitoring](./img_Src/S3_Bucket.png)
 
 ## 🔄 Pipeline Monitoring & Maintenance
 
