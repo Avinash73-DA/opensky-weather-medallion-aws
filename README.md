@@ -176,7 +176,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 
 ### 🌬️ Apache Airflow Pipeline
 
-![Airflow DAG](./img_Src/airflow_dag.png)
+![Airflow DAG](./img_Src/Airflow_Code_Dag.png)
 
 **DAG Structure**:
 ```python
@@ -194,7 +194,7 @@ process_enriched_data >> [gold_weather_impact, flight_weather, weather_history]
 
 ### 🔍 Amazon Athena Integration
 
-![Athena Queries](./img_Src/athena_setup.png)
+![Athena Queries](./img_Src/Crawler.png)
 
 - **Purpose**: SQL-based analytics across all layers
 - **Features**: Partition pruning for optimized queries
