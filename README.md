@@ -69,3 +69,61 @@ It ingests **live weather data** (OpenWeather API 🌦️) and **live flight dat
 │       ├── CityWeatherHistory/country=AE, AF
 │       ├── flight_weather_snapshot/
 │       └── weather_Impact_flights/
+
+## 🔄 Process Flow  
+
+### 🥉 Bronze Layer (Lambda Ingestion)  
+- **Weather Data**: Pulling **1500 cities live weather data** from OpenWeather API → Stored as JSON in **S3 Bronze**.  
+- **Flight Data**: Pulling **live plane positions** from OpenSky API → Stored as JSON in **S3 Bronze**.  
+
+📷 ![Bronze Layer](img_Src/bronze_layer.png)  
+
+---
+
+### 🥈 Silver Layer (Glue Script & Crawler)  
+- Defined **structured schema** using PySpark `StructType`.  
+- Converted **JSON → Parquet** with partitioning:  
+  - Weather → partitioned by **Country**  
+  - Flights → partitioned by **Year & Month**  
+- **Enriched Table**: Linked weather & flights using **Haversine formula** (closest city to flight coordinates).  
+- Enabled **Glue Job Bookmark** → Avoids reprocessing old files.  
+- Implemented **deduplication** at Silver layer.  
+- Created Athena schema with **Glue Crawler**.  
+
+📷 ![Silver Layer](img_Src/silver_layer.png)  
+
+---
+
+### 🥇 Gold Layer (Glue Notebook)  
+- Built **3 curated datasets**:  
+  1. **Flight + Weather Combined Data** → partitioned by *Year, Month*  
+  2. **Weather History (Avg, Min, Max)** → partitioned by *Country*  
+  3. **Weather Impact on Flights** → aggregated snapshot of flights stuck in storms, delays, etc.  
+- Stored as **Parquet tables** in **Gold S3 bucket**.  
+
+📷 ![Gold Layer](img_Src/gold_layer.png)  
+
+---
+
+### 🔍 Athena  
+- Queryable datasets for **analytics and reporting**.  
+- Partition pruning enabled for **faster queries**.  
+
+📷 ![Athena](img_Src/athena.png)  
+
+---
+
+### 📡 Airflow Orchestration  
+- **Airflow DAG** orchestrates ingestion & transformation every **1 hour**.  
+- Flow:  
+
+```python
+# Step 1: Bronze ingestion triggers Silver jobs
+lambda_flights >> process_plane_data
+lambda_weather >> process_weather_data
+
+# Step 2: Enrichment after initial Silver jobs
+[process_plane_data, process_weather_data] >> process_enriched_data
+
+# Step 3: Gold jobs in parallel after enrichment
+process_enriched_data >> [gold_weather_impact, flight_weather, weather_history]
