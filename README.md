@@ -176,7 +176,21 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     Calculate the great circle distance between two points 
     on the earth (specified in decimal degrees)
     """
-    # Implementation details...
+    R = lit(6371)
+
+    # Convert latitude and longitude from degrees to radians for calculation
+    lat1 = radians(col("air_lat"))
+    lon1 = radians(col("air_lon"))
+    lat2 = radians(col("weather_lat"))
+    lon2 = radians(col("weather_lon"))
+
+    # Haversine formula implementation to calculate the distance between plane and weather station
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * asin(sqrt(a))
+    haversine_expr = R * c
+    
 ```
 
 **Process Flow**:
