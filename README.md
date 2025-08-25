@@ -38,7 +38,7 @@ This project implements a **scalable, real-time data engineering pipeline** that
 - ⚡ **Automated Processing**: Hourly data refresh with Airflow orchestration
 - 🔄 **Efficient Processing**: Implements job bookmarking and deduplication
 
-![Project Overview Diagram](./img_Src/Workflow Diagram.png)
+![Project Overview Diagram](./img_Src/Project_Overview.png)
 *Architecture Overview - Real-time Weather & Flight Data Pipeline*
 
 ## 🏗️ Project Architecture
