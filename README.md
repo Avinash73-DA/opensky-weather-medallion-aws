@@ -262,10 +262,6 @@ process_enriched_data >> [gold_weather_impact, flight_weather, weather_history]
 
 ## 📈 Analytics & Insights
 
-### 🎯 Key Metrics Dashboard
-
-![Analytics Dashboard](./img_Src/analytics_dashboard.png)
-
 **Available Insights**:
 - 🌡️ Global temperature trends and patterns
 - ✈️ Flight density correlation with weather
@@ -277,15 +273,21 @@ process_enriched_data >> [gold_weather_impact, flight_weather, weather_history]
 
 ```sql
 -- Weather Impact on Flights
-SELECT 
+SELECT
+    CAST(from_unixtime(time_position) AS DATE) AS normal_date,
     country,
-    weather_condition,
-    COUNT(*) as affected_flights,
-    AVG(delay_minutes) as avg_delay
-FROM gold.weather_impact_flights
-WHERE year = 2025 AND month = 8
-GROUP BY country, weather_condition
-ORDER BY affected_flights DESC;
+    city,
+    COUNT(*) as total_flights,
+    COUNT(CASE
+        WHEN description IN ('very heavy rain','heavy intensity rain','moderate rain') THEN 1
+    END) AS storm
+FROM "enriched_silverplane_weather_enriched" 
+GROUP BY  CAST(from_unixtime(time_position) AS DATE), country, city
+HAVING COUNT(CASE
+        WHEN description IN ('very heavy rain','heavy intensity rain','moderate rain') THEN 1
+    END) > 0
+
+
 ```
 
 ## 🚀 Getting Started
